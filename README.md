@@ -7,20 +7,26 @@ This project implements a sentiment analysis model for tweets using Logistic Reg
 ```
 .
 ├── src/
-│   ├── app.py          
-│   ├── train.py        
-│   ├── models/         
-│   │   ├── lgbm_model.py
+│   ├── app.py          # FastAPI application
+│   ├── train.py        # Model training script
+│   ├── inference.py    # Inference logic
+│   ├── config.py       # Configuration settings
+│   ├── dto.py          # Data transfer objects
+│   ├── models/         # Model implementations
+│   │   ├── logistic_regression.py
+│   │   ├── model_loader.py
 │   │   └── __init__.py
-│   ├── data/      
+│   ├── data/          # Data processing
 │   │   ├── dataset.py
 │   │   └── __init__.py          
-│   └── test/      
+│   └── test/          # Testing
 │       └── locustfile.py     
-├── data/                
-├── requirements.txt     
-├── Dockerfile          
-└── docker-compose.yml 
+├── data/              # Data directory
+├── models/            # Saved model artifacts
+├── requirements.txt   # Project dependencies
+├── Dockerfile        # Container definition
+├── prometheus.yml    # Prometheus configuration
+└── docker-compose.yml # Container orchestration
 ```
 
 ## Setup
@@ -83,31 +89,35 @@ Response format:
 
 - `prediction_time_seconds`: Histogram of prediction processing time
 - `prediction_requests_total`: Counter of total predictions by sentiment
+- `http_requests_total`: Counter of HTTP requests by endpoint and status
 
 ## Query in Prometheus
 
-- Go to the 'Graph' tab
-- Try these basic queries:
-- Rate of predictions:`rate(prediction_requests_total[5m])`
-- Average response time:`rate(prediction_time_seconds_sum[5m]) / rate(prediction_time_seconds_count[5m])`
-- HTTP success rate:`sum(rate(http_requests_total{status="200"}[5m]))`
+1. Access the Prometheus UI at http://localhost:9090
+2. Go to the 'Graph' tab
+3. Try these example queries:
+   - Rate of predictions: `rate(prediction_requests_total[5m])`
+   - Average response time: `rate(prediction_time_seconds_sum[5m]) / rate(prediction_time_seconds_count[5m])`
+   - HTTP success rate: `sum(rate(http_requests_total{status="200"}[5m]))`
 
 ## Visualization in Grafana
 
 ### Connection to Prometheus
 
-- Go to connection, Click "Add data source" and select "Prometheus".
-- In the HTTP URL field, enter " http://prometheus:9090 " (this is the internal Docker network URL).
-- Click "Save & Test" to verify the connection
+1. Access Grafana at http://localhost:3000
+2. Go to Configuration > Data Sources
+3. Click "Add data source" and select "Prometheus"
+4. In the HTTP URL field, enter `http://prometheus:9090` (internal Docker network URL)
+5. Click "Save & Test" to verify the connection
 
 ### Creating Dashboard
 
-- Click '+ Create' > 'Dashboard'
-- Add a new panel and select Prometheus as the data source
-- For basic metrics, you can use these queries:
-- `prediction_requests_total` - Shows total predictions by sentiment
-- `prediction_time_seconds_bucket` - Shows prediction latency distribution
-- `http_requests_total` - Shows total HTTP requests by endpoint
+1. Click '+ Create' > 'Dashboard'
+2. Add a new panel and select Prometheus as the data source
+3. Use these example queries for basic metrics:
+   - `prediction_requests_total` - Shows total predictions by sentiment
+   - `prediction_time_seconds_bucket` - Shows prediction latency distribution
+   - `http_requests_total` - Shows total HTTP requests by endpoint
 
 ## Performance Testing
 
@@ -118,3 +128,12 @@ locust -f src/test/locustfile.py
 ```
 
 Access the Locust web interface at http://localhost:8089 to configure and start the test.
+
+## Model Details
+
+The sentiment analysis model uses Logistic Regression with the following features:
+- Binary classification (positive/negative sentiment)
+- Scikit-learn implementation
+- Accuracy metrics for both training and validation sets
+
+The model is automatically saved after training and loaded during API initialization.
