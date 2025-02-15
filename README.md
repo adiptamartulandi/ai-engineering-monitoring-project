@@ -1,6 +1,7 @@
 # Tweet Sentiment Analysis API
 
 This project implements a sentiment analysis model for tweets using Logistic Regression, wrapped in a FastAPI application with monitoring capabilities using Prometheus and Grafana.
+This project highlight how Data Scientist can setup monitoring system for their model.
 
 ## Project Structure
 
